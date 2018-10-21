@@ -1,0 +1,1795 @@
+Microsoft (R) Macro Assembler Version 14.00.23026.0	    09/12/18 17:56:36
+AddTwo.asm						     Page 1 - 1
+
+
+				; ------------ - GUI Kalkulator---------------- -
+
+				; Projekat iz Racunarske elektronike napisan koristeci Irvine32.inc biblioteku
+				; Studenti: Petar Pavlovic 188 / 2015 i Luka Adamovic 526 / 2015
+				; Elektrotehnicki Fakultet u Beogradu
+				; AddTwo.asm - Glavni asemblerski fajl
+				; Uputstvo za koriscenje kalkulatora:
+				; Prvi korak : Uneti zeljenji pozitivan ili negativan broj, zatim kliknuti Enter
+				; Drugi korak : Uneti neku od ponudjenih operacija
+				; Treci korak : Uneti drugi operand, zatim kliknuti Enter
+				; Cetvrti korak : Diviti se rezultatu : 3
+				; Peti korak : Ukoliko zelite nazad na ponovno racunanje kliknuti Enter, pa se onda vratiti Prvi korak,
+				; a ukoliko zelite da izadjete iz programa jos dva puta kliknuti Enter
+
+				INCLUDE Irvine32.inc
+			      C ; Include file for Irvine32.lib             (Irvine32.inc)
+			      C 
+			      C ;OPTION CASEMAP:NONE		; optional: make identifiers case-sensitive
+			      C 
+			      C INCLUDE SmallWin.inc		; MS-Windows prototypes, structures, and constants
+			      C .NOLIST
+			      C .LIST
+			      C 
+			      C INCLUDE VirtualKeys.inc
+			      C ; VirtualKeys.inc
+			      C .NOLIST
+			      C .LIST
+			      C 
+			      C 
+			      C .NOLIST
+			      C .LIST
+			      C 
+
+				; ------------ - Define the grid------------------
+ = 00000000			lineTop = 0; top row number
+ = 00000000			lineLeft = 0; left row number
+ = 00000004			lineHorizontal1 = 4; horizontal row number
+ = 00000008			lineHorizontal2 = 8
+ = 0000000C			lineHorizontal3 = 12
+ = 00000010			lineHorizontal4 = 16
+ = 00000014			lineBottom = 20; bottom row number
+ = 00000010			lineRight = 16; right row number
+ = 00000004			lineVertical1 = 4; vertical row number
+ = 00000008			lineVertical2 = 8
+ = 0000000C			lineVertical3 = 12
+
+				; ----------------Corners position-------------- -
+
+				; ---------------- - Corners------------------------
+ = 00000000			x11 = 0
+ = 00000000			y11 = 0
+ = 00000010			x15 = 16
+ = 00000000			y15 = 0
+ = 00000000			x61 = 0
+ = 00000014			y61 = 20
+ = 00000010			x65 = 16
+ = 00000014			y65 = 20
+
+				; ------------------ - Side corners----------------------
+ = 00000000			x21 = 0
+ = 00000004			y21 = 4
+ = 00000004			x22 = 4
+ = 00000004			y22 = 4
+ = 00000008			x23 = 8
+ = 00000004			y23 = 4
+ = 0000000C			x24 = 12
+ = 00000004			y24 = 4
+ = 00000010			x25 = 16
+ = 00000004			y25 = 4
+ = 00000000			x31 = 0
+ = 00000008			y31 = 8
+ = 00000010			x35 = 16
+ = 00000008			y35 = 8
+ = 00000000			x41 = 0
+ = 0000000C			y41 = 12
+ = 00000010			x45 = 16
+ = 0000000C			y45 = 12
+ = 00000000			x51 = 0
+ = 00000010			y51 = 16
+ = 00000010			x55 = 16
+ = 00000010			y55 = 16
+ = 00000004			x62 = 4
+ = 00000014			y62 = 20
+ = 00000008			x63 = 8
+ = 00000014			y63 = 20
+ = 0000000C			x64 = 12
+ = 00000014			y64 = 20
+
+				; -------------- - Central corners------------------
+ = 00000004			x32 = 4
+ = 00000008			y32 = 8
+ = 00000008			x33 = 8
+ = 00000008			y33 = 8
+ = 0000000C			x34 = 12
+ = 00000008			y34 = 8
+ = 00000004			x42 = 4
+ = 0000000C			y42 = 12
+ = 00000008			x43 = 8
+ = 0000000C			y43 = 12
+ = 0000000C			x44 = 12
+ = 0000000C			y44 = 12
+ = 00000004			x52 = 4
+ = 00000010			y52 = 16
+ = 00000008			x53 = 8
+ = 00000010			y53 = 16
+ = 0000000C			x54 = 12
+ = 00000010			y54 = 16
+
+				; ------------------ - Char position------------------ -
+ = 00000002			x0 = 2
+ = 00000012			y0 = 18
+ = 00000006			xeq = 6
+ = 00000012			yeq = 18
+ = 0000000A			xpow = 10
+ = 00000012			ypow = 18
+ = 0000000E			xad = 14
+ = 00000012			yad = 18
+ = 00000002			x1 = 2
+ = 0000000E			y1 = 14
+ = 00000006			x2 = 6
+ = 0000000E			y2 = 14
+ = 0000000A			x3 = 10
+ = 0000000E			y3 = 14
+ = 0000000E			xsub = 14
+ = 0000000E			ysub = 14
+ = 00000002			x4 = 2
+ = 0000000A			y4 = 10
+ = 00000006			x5 = 6
+ = 0000000A			y5 = 10
+ = 0000000A			x6 = 10
+ = 0000000A			y6 = 10
+ = 0000000E			xmul = 14
+ = 0000000A			ymul = 10
+ = 00000002			x7 = 2
+ = 00000006			y7 = 6
+ = 00000006			x8 = 6
+ = 00000006			y8 = 6
+ = 0000000A			x9 = 10
+ = 00000006			y9 = 6
+ = 0000000E			xdiv = 14
+ = 00000006			ydiv = 6
+ = 00000002			xfirst = 2
+ = 00000002			yfirst = 2
+
+				; ------------------Define the window size------------------ -
+ = 00000000			xmin = 0; left edge
+ = 00000011			xmax = 17; right edge
+ = 00000000			ymin = 0; top
+ = 00000015			ymax = 21; bottom
+
+
+ 00000000			.data		;Strings for writing and variables that are used in program
+ 00000000 0000			num1 word ?
+ 00000002 0000			num2 word ?
+
+ 00000004 00			button byte ?
+ 00000005 2D 00			pomneg byte "-", 0
+ 00000007 69 6E 66 20 3A	pominf byte "inf :(", 0
+	   28 00
+ 0000000E 75 6E 64 65 66	pomnul byte "undefined :p", 0
+	   69 6E 65 64 20
+	   3A 70 00
+ 0000001B 20 20 20 20 20	pomerase byte "             ", 0
+	   20 20 20 20 20
+	   20 20 20 00
+
+ 00000000			.code		;Code of program starts here
+
+ 00000000			main PROC
+
+				; PROGRAM STARTS HERE
+				; --------------------------------------------------------------
+
+				;-----------------------Color of the background-----------------
+ 00000000  B8 0000001F		mov eax, white + (blue * 16)
+ 00000005  E8 00000000 E	call SetTextColor
+ 0000000A  E8 00000000 E	call Clrscr
+
+				; ---- - ---------------Hides the cursor-------------------------
+ 00000029			.data
+ 00000029 00000000		cursorInfo CONSOLE_CURSOR_INFO <>
+	   00000000
+ 00000031 00000000		outHandle  DWORD ?
+ 0000000F			.code
+				INVOKE GetStdHandle, STD_OUTPUT_HANDLE
+ 0000000F  6A F5	   *	    push    -00000000Bh
+ 00000011  E8 00000000 E   *	    call   GetStdHandle
+ 00000016  A3 00000031 R	mov  outHandle, eax
+				INVOKE GetConsoleCursorInfo, outHandle, ADDR cursorInfo
+ 0000001B  68 00000029 R   *	    push   OFFSET cursorInfo
+ 00000020  FF 35 00000031 R *	    push   outHandle
+ 00000026  E8 00000000 E   *	    call   GetConsoleCursorInfo
+ 0000002B  C7 05 0000002D R	mov  cursorInfo.bVisible, 0
+	   00000000
+				INVOKE SetConsoleCursorInfo, outHandle, ADDR cursorInfo
+ 00000035  68 00000029 R   *	    push   OFFSET cursorInfo
+ 0000003A  FF 35 00000031 R *	    push   outHandle
+ 00000040  E8 00000000 E   *	    call   SetConsoleCursorInfo
+				; -------------------------------------------------------------- -
+
+				; ------Draw the Vertical Line 1----------------------------------------
+				; from(0, 0) --to (0, 20)
+
+ 00000045  B2 00		mov  dl, lineLeft
+ 00000047  B6 00		mov  dh, lineTop
+ 00000049  B9 00000015		mov  ecx, lineBottom - lineTop + 1
+ 0000004E  B0 BA		mov  al, 0BAh
+
+ 00000050			DrawLineV1 :
+ 00000050  E8 00000000 E	call Gotoxy
+ 00000055  E8 00000000 E	call WriteChar
+ 0000005A  FE C6		inc  dh
+ 0000005C  E2 F2		loop DrawLineV1
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Vertical Line 2 ----------------------------------------
+				; from(4, 4) --to(4, 20)
+
+ 0000005E  B2 04		mov  dl, lineVertical1
+ 00000060  B6 04		mov  dh, lineHorizontal1
+ 00000062  B9 00000011		mov  ecx, lineBottom - lineHorizontal1 + 1
+ 00000067  B0 BA		mov  al, 0BAh
+
+ 00000069			DrawLineV2 :
+ 00000069  E8 00000000 E	call Gotoxy
+ 0000006E  E8 00000000 E	call WriteChar
+ 00000073  FE C6		inc  dh
+ 00000075  E2 F2		loop DrawLineV2
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Vertical Line 3 ----------------------------------------
+				; from(8, 4) --to(8, 20)
+
+ 00000077  B2 08		mov  dl, lineVertical2
+ 00000079  B6 04		mov  dh, lineHorizontal1
+ 0000007B  B9 00000011		mov  ecx, lineBottom - lineHorizontal1 + 1
+ 00000080  B0 BA		mov  al, 0BAh
+
+ 00000082			DrawLineV3 :
+ 00000082  E8 00000000 E	call Gotoxy
+ 00000087  E8 00000000 E	call WriteChar
+ 0000008C  FE C6		inc  dh
+ 0000008E  E2 F2		loop DrawLineV3
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Vertical Line 4 ----------------------------------------
+				; from(12, 4) --to(12, 20)
+
+ 00000090  B2 0C		mov  dl, lineVertical3
+ 00000092  B6 04		mov  dh, lineHorizontal1
+ 00000094  B9 00000011		mov  ecx, lineBottom - lineHorizontal1 + 1
+ 00000099  B0 BA		mov  al, 0BAh
+
+ 0000009B			DrawLineV4 :
+ 0000009B  E8 00000000 E	call Gotoxy
+ 000000A0  E8 00000000 E	call WriteChar
+ 000000A5  FE C6		inc  dh
+ 000000A7  E2 F2		loop DrawLineV4
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Vertical Line 5 ----------------------------------------
+				; from(16, 0) --to(16, 20)
+
+ 000000A9  B2 10		mov  dl, lineRight
+ 000000AB  B6 00		mov  dh, lineTop
+ 000000AD  B9 00000015		mov  ecx, lineBottom - lineTop + 1
+ 000000B2  B0 BA		mov  al, 0BAh
+
+ 000000B4			DrawLineV5 :
+ 000000B4  E8 00000000 E	call Gotoxy
+ 000000B9  E8 00000000 E	call WriteChar
+ 000000BE  FE C6		inc  dh
+ 000000C0  E2 F2		loop DrawLineV5
+				; ------------------------------------------------------------ -
+
+
+				; ------Draw the Horizontal Line 1 ----------------------------------------
+				; from(0, 0) --to(16, 0)
+
+ 000000C2  B6 00		mov  dh, lineTop
+ 000000C4  B2 00		mov  dl, lineLeft
+ 000000C6  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 000000CB  B0 CD		mov  al, 0CDh
+
+ 000000CD			DrawLineH1 :
+ 000000CD  E8 00000000 E	call Gotoxy
+ 000000D2  E8 00000000 E	call WriteChar
+ 000000D7  FE C2		inc  dl
+ 000000D9  E2 F2		loop DrawLineH1
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Horizontal Line 2 ----------------------------------------
+				; from(0, 4) --to(16, 4)
+
+ 000000DB  B6 04		mov  dh, lineHorizontal1
+ 000000DD  B2 00		mov  dl, lineLeft
+ 000000DF  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 000000E4  B0 CD		mov  al, 0CDh
+
+ 000000E6			DrawLineH2 :
+ 000000E6  E8 00000000 E	call Gotoxy
+ 000000EB  E8 00000000 E	call WriteChar
+ 000000F0  FE C2		inc  dl
+ 000000F2  E2 F2		loop DrawLineH2
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Horizontal Line 3 ----------------------------------------
+				; from(0, 8) --to(16, 8)
+
+ 000000F4  B6 08		mov  dh, lineHorizontal2
+ 000000F6  B2 00		mov  dl, lineLeft
+ 000000F8  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 000000FD  B0 CD		mov  al, 0CDh
+
+ 000000FF			DrawLineH3 :
+ 000000FF  E8 00000000 E	call Gotoxy
+ 00000104  E8 00000000 E	call WriteChar
+ 00000109  FE C2		inc  dl
+ 0000010B  E2 F2		loop DrawLineH3
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Horizontal Line 4 ----------------------------------------
+				; from(0, 12) --to(16, 12)
+
+ 0000010D  B6 0C		mov  dh, lineHorizontal3
+ 0000010F  B2 00		mov  dl, lineLeft
+ 00000111  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 00000116  B0 CD		mov  al, 0CDh
+
+ 00000118			DrawLineH4 :
+ 00000118  E8 00000000 E	call Gotoxy
+ 0000011D  E8 00000000 E	call WriteChar
+ 00000122  FE C2		inc  dl
+ 00000124  E2 F2		loop DrawLineH4
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Horizontal Line 5 ----------------------------------------
+				; from(0, 16) --to(16, 16)
+
+ 00000126  B6 10		mov  dh, lineHorizontal4
+ 00000128  B2 00		mov  dl, lineLeft
+ 0000012A  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 0000012F  B0 CD		mov  al, 0CDh
+
+ 00000131			DrawLineH5 :
+ 00000131  E8 00000000 E	call Gotoxy
+ 00000136  E8 00000000 E	call WriteChar
+ 0000013B  FE C2		inc  dl
+ 0000013D  E2 F2		loop DrawLineH5
+				; ------------------------------------------------------------ -
+
+				; ------Draw the Horizontal Line 6 ----------------------------------------
+				; from(0, 20) --to(16, 20)
+
+ 0000013F  B6 14		mov  dh, lineBottom
+ 00000141  B2 00		mov  dl, lineLeft
+ 00000143  B9 00000011		mov  ecx, lineRight - lineLeft + 1
+ 00000148  B0 CD		mov  al, 0CDh
+
+ 0000014A			DrawLineH6 :
+ 0000014A  E8 00000000 E	call Gotoxy
+ 0000014F  E8 00000000 E	call WriteChar
+ 00000154  FE C2		inc  dl
+ 00000156  E2 F2		loop DrawLineH6
+				; ------------------------------------------------------------ -
+
+				; ------Draw corners----------------------------------------
+ 00000158  B0 C9		mov al, 0C9h
+ 0000015A  B2 00		mov dl, x11
+ 0000015C  B6 00		mov dh, y11
+
+ 0000015E  E8 00000000 E	call Gotoxy
+ 00000163  E8 00000000 E	call WriteChar
+
+ 00000168  B0 BB		mov al, 0BBh
+ 0000016A  B2 10		mov dl, x15
+ 0000016C  B6 00		mov dh, y15
+
+ 0000016E  E8 00000000 E	call Gotoxy
+ 00000173  E8 00000000 E	call WriteChar
+
+ 00000178  B0 BC		mov al, 0BCh
+ 0000017A  B2 10		mov dl, x65
+ 0000017C  B6 14		mov dh, y65
+
+ 0000017E  E8 00000000 E	call Gotoxy
+ 00000183  E8 00000000 E	call WriteChar
+
+ 00000188  B0 C8		mov al, 0C8h
+ 0000018A  B2 00		mov dl, x61
+ 0000018C  B6 14		mov dh, y61
+
+ 0000018E  E8 00000000 E	call Gotoxy
+ 00000193  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw right curve----------------------------------------
+ 00000198  B0 CC		mov al, 0CCh
+ 0000019A  B2 00		mov dl, x21
+ 0000019C  B6 04		mov dh, y21
+
+ 0000019E  E8 00000000 E	call Gotoxy
+ 000001A3  E8 00000000 E	call WriteChar
+
+ 000001A8  B2 00		mov dl, x31
+ 000001AA  B6 08		mov dh, y31
+
+ 000001AC  E8 00000000 E	call Gotoxy
+ 000001B1  E8 00000000 E	call WriteChar
+
+ 000001B6  B2 00		mov dl, x41
+ 000001B8  B6 0C		mov dh, y41
+
+ 000001BA  E8 00000000 E	call Gotoxy
+ 000001BF  E8 00000000 E	call WriteChar
+
+ 000001C4  B2 00		mov dl, x51
+ 000001C6  B6 10		mov dh, y51
+
+ 000001C8  E8 00000000 E	call Gotoxy
+ 000001CD  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw left curve----------------------------------------
+ 000001D2  B0 B9		mov al, 0B9h
+ 000001D4  B2 10		mov dl, x25
+ 000001D6  B6 04		mov dh, y25
+
+ 000001D8  E8 00000000 E	call Gotoxy
+ 000001DD  E8 00000000 E	call WriteChar
+
+ 000001E2  B2 10		mov dl, x35
+ 000001E4  B6 08		mov dh, y35
+
+ 000001E6  E8 00000000 E	call Gotoxy
+ 000001EB  E8 00000000 E	call WriteChar
+
+ 000001F0  B2 10		mov dl, x45
+ 000001F2  B6 0C		mov dh, y45
+
+ 000001F4  E8 00000000 E	call Gotoxy
+ 000001F9  E8 00000000 E	call WriteChar
+
+ 000001FE  B2 10		mov dl, x55
+ 00000200  B6 10		mov dh, y55
+
+ 00000202  E8 00000000 E	call Gotoxy
+ 00000207  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw down curve----------------------------------------
+ 0000020C  B0 CB		mov al, 0CBh
+ 0000020E  B2 04		mov dl, x22
+ 00000210  B6 04		mov dh, y22
+
+ 00000212  E8 00000000 E	call Gotoxy
+ 00000217  E8 00000000 E	call WriteChar
+
+ 0000021C  B2 08		mov dl, x23
+ 0000021E  B6 04		mov dh, y23
+
+ 00000220  E8 00000000 E	call Gotoxy
+ 00000225  E8 00000000 E	call WriteChar
+
+ 0000022A  B2 0C		mov dl, x24
+ 0000022C  B6 04		mov dh, y24
+
+ 0000022E  E8 00000000 E	call Gotoxy
+ 00000233  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw up curve----------------------------------------
+ 00000238  B0 CA		mov al, 0CAh
+ 0000023A  B2 04		mov dl, x62
+ 0000023C  B6 14		mov dh, y62
+
+ 0000023E  E8 00000000 E	call Gotoxy
+ 00000243  E8 00000000 E	call WriteChar
+
+ 00000248  B2 08		mov dl, x63
+ 0000024A  B6 14		mov dh, y63
+
+ 0000024C  E8 00000000 E	call Gotoxy
+ 00000251  E8 00000000 E	call WriteChar
+
+ 00000256  B2 0C		mov dl, x64
+ 00000258  B6 14		mov dh, y64
+
+ 0000025A  E8 00000000 E	call Gotoxy
+ 0000025F  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw center----------------------------------------
+ 00000264  B0 CE		mov al, 0CEh
+ 00000266  B2 04		mov dl, x32
+ 00000268  B6 08		mov dh, y32
+
+ 0000026A  E8 00000000 E	call Gotoxy
+ 0000026F  E8 00000000 E	call WriteChar
+
+ 00000274  B2 08		mov dl, x33
+ 00000276  B6 08		mov dh, y33
+
+ 00000278  E8 00000000 E	call Gotoxy
+ 0000027D  E8 00000000 E	call WriteChar
+
+ 00000282  B2 0C		mov dl, x34
+ 00000284  B6 08		mov dh, y34
+
+ 00000286  E8 00000000 E	call Gotoxy
+ 0000028B  E8 00000000 E	call WriteChar
+
+ 00000290  B2 04		mov dl, x42
+ 00000292  B6 0C		mov dh, y42
+
+ 00000294  E8 00000000 E	call Gotoxy
+ 00000299  E8 00000000 E	call WriteChar
+
+ 0000029E  B2 08		mov dl, x43
+ 000002A0  B6 0C		mov dh, y43
+
+ 000002A2  E8 00000000 E	call Gotoxy
+ 000002A7  E8 00000000 E	call WriteChar
+
+ 000002AC  B2 0C		mov dl, x44
+ 000002AE  B6 0C		mov dh, y44
+
+ 000002B0  E8 00000000 E	call Gotoxy
+ 000002B5  E8 00000000 E	call WriteChar
+
+ 000002BA  B2 04		mov dl, x52
+ 000002BC  B6 10		mov dh, y52
+
+ 000002BE  E8 00000000 E	call Gotoxy
+ 000002C3  E8 00000000 E	call WriteChar
+
+ 000002C8  B2 08		mov dl, x53
+ 000002CA  B6 10		mov dh, y53
+
+ 000002CC  E8 00000000 E	call Gotoxy
+ 000002D1  E8 00000000 E	call WriteChar
+
+ 000002D6  B2 0C		mov dl, x54
+ 000002D8  B6 10		mov dh, y54
+
+ 000002DA  E8 00000000 E	call Gotoxy
+ 000002DF  E8 00000000 E	call WriteChar
+				; ------------------------------------------
+
+				; ------Draw chars----------------------------------------
+ 000002E4  B0 30		mov al, 030h
+ 000002E6  B2 02		mov dl, x0
+ 000002E8  B6 12		mov dh, y0
+
+ 000002EA  E8 00000000 E	call Gotoxy
+ 000002EF  E8 00000000 E	call WriteChar
+
+ 000002F4  B0 3D		mov al, 03Dh
+ 000002F6  B2 06		mov dl, xeq
+ 000002F8  B6 12		mov dh, yeq
+
+ 000002FA  E8 00000000 E	call Gotoxy
+ 000002FF  E8 00000000 E	call WriteChar
+
+ 00000304  B0 5E		mov al, 05Eh
+ 00000306  B2 0A		mov dl, xpow
+ 00000308  B6 12		mov dh, ypow
+
+ 0000030A  E8 00000000 E	call Gotoxy
+ 0000030F  E8 00000000 E	call WriteChar
+
+ 00000314  B0 2B		mov al, 02Bh
+ 00000316  B2 0E		mov dl, xad
+ 00000318  B6 12		mov dh, yad
+
+ 0000031A  E8 00000000 E	call Gotoxy
+ 0000031F  E8 00000000 E	call WriteChar
+
+ 00000324  B0 31		mov al, 031h
+ 00000326  B2 02		mov dl, x1
+ 00000328  B6 0E		mov dh, y1
+
+ 0000032A  E8 00000000 E	call Gotoxy
+ 0000032F  E8 00000000 E	call WriteChar
+
+ 00000334  B0 32		mov al, 032h
+ 00000336  B2 06		mov dl, x2
+ 00000338  B6 0E		mov dh, y2
+
+ 0000033A  E8 00000000 E	call Gotoxy
+ 0000033F  E8 00000000 E	call WriteChar
+
+ 00000344  B0 33		mov al, 033h
+ 00000346  B2 0A		mov dl, x3
+ 00000348  B6 0E		mov dh, y3
+
+ 0000034A  E8 00000000 E	call Gotoxy
+ 0000034F  E8 00000000 E	call WriteChar
+
+ 00000354  B0 2D		mov al, 02Dh
+ 00000356  B2 0E		mov dl, xsub
+ 00000358  B6 0E		mov dh, ysub
+
+ 0000035A  E8 00000000 E	call Gotoxy
+ 0000035F  E8 00000000 E	call WriteChar
+
+ 00000364  B0 34		mov al, 034h
+ 00000366  B2 02		mov dl, x4
+ 00000368  B6 0A		mov dh, y4
+
+ 0000036A  E8 00000000 E	call Gotoxy
+ 0000036F  E8 00000000 E	call WriteChar
+
+ 00000374  B0 35		mov al, 035h
+ 00000376  B2 06		mov dl, x5
+ 00000378  B6 0A		mov dh, y5
+
+ 0000037A  E8 00000000 E	call Gotoxy
+ 0000037F  E8 00000000 E	call WriteChar
+
+ 00000384  B0 36		mov al, 036h
+ 00000386  B2 0A		mov dl, x6
+ 00000388  B6 0A		mov dh, y6
+
+ 0000038A  E8 00000000 E	call Gotoxy
+ 0000038F  E8 00000000 E	call WriteChar
+
+ 00000394  B0 78		mov al, 078h
+ 00000396  B2 0E		mov dl, xmul
+ 00000398  B6 0A		mov dh, ymul
+
+ 0000039A  E8 00000000 E	call Gotoxy
+ 0000039F  E8 00000000 E	call WriteChar
+
+ 000003A4  B0 37		mov al, 037h
+ 000003A6  B2 02		mov dl, x7
+ 000003A8  B6 06		mov dh, y7
+
+ 000003AA  E8 00000000 E	call Gotoxy
+ 000003AF  E8 00000000 E	call WriteChar
+
+ 000003B4  B0 38		mov al, 038h
+ 000003B6  B2 06		mov dl, x8
+ 000003B8  B6 06		mov dh, y8
+
+ 000003BA  E8 00000000 E	call Gotoxy
+ 000003BF  E8 00000000 E	call WriteChar
+
+ 000003C4  B0 39		mov al, 039h
+ 000003C6  B2 0A		mov dl, x9
+ 000003C8  B6 06		mov dh, y9
+
+ 000003CA  E8 00000000 E	call Gotoxy
+ 000003CF  E8 00000000 E	call WriteChar
+
+ 000003D4  B0 F6		mov al, 0F6h
+ 000003D6  B2 0E		mov dl, xdiv
+ 000003D8  B6 06		mov dh, ydiv
+
+ 000003DA  E8 00000000 E	call Gotoxy
+ 000003DF  E8 00000000 E	call WriteChar
+
+ 000003E4  B2 02		mov dl, xfirst
+ 000003E6  B6 02		mov dh, yfirst
+ 000003E8  E8 00000000 E	call Gotoxy
+
+ 000003ED  EB 11		jmp start 
+				; -------------------Drawing ends here-----------------------
+
+				;--------------------Press any key to continue...------------
+ 000003EF			loopWait:
+ 000003EF  B8 0000000A			mov eax, 10 ;delay for msg processing
+ 000003F4  E8 00000000 E		call Delay
+ 000003F9  E8 00000000 E		call ReadKey
+ 000003FE  74 EF			JZ loopWait
+
+ 00000400			start :
+
+					;---------------------Positioning for writing----------
+ 00000400  B2 02			mov dl, xfirst
+ 00000402  B6 02			mov dh, yfirst
+
+ 00000404  E8 00000000 E		call Gotoxy
+
+ 00000409  BA 0000001B R		mov edx, offset pomerase
+ 0000040E  E8 00000000 E		call writestring
+
+ 00000413  B2 02			mov dl, xfirst
+ 00000415  B6 02			mov dh, yfirst
+
+ 00000417  E8 00000000 E		call Gotoxy
+
+
+				; ----------Read and write first No------------------ -
+ 0000041C  BA 00000000 R		mov edx, offset num1			; Read first no
+ 00000421  E8 00000000 E		call readint
+ 00000426  66| A3			mov num1, ax
+	   00000000 R
+
+ 0000042C  B2 02			mov dl, xfirst
+ 0000042E  B6 02			mov dh, yfirst
+
+ 00000430  E8 00000000 E		call Gotoxy
+ 00000435  E8 00000000 E		call WriteInt
+
+				; ---------------------------------------------------- -
+
+				; ---------- - Read and write operation------------------
+ 0000043A  BA 00000004 R		mov edx, offset button
+ 0000043F  E8 00000000 E		call readchar
+ 00000444  A2 00000004 R		mov button, al
+
+ 00000449  E8 00000000 E		call WriteChar
+
+ 0000044E  80 3D 00000004 R		cmp button, '+'
+	   2B
+ 00000455  74 47			JE addition
+
+ 00000457  80 3D 00000004 R		cmp button, '-'
+	   2D
+ 0000045E  0F 84 000000B7		JE subtraction
+
+ 00000464  80 3D 00000004 R		cmp button, '*'
+	   2A
+ 0000046B  0F 84 00000177		JE multiplication
+
+ 00000471  80 3D 00000004 R		cmp button, '/'
+	   2F
+ 00000478  0F 84 000001FE		JE division
+
+ 0000047E  80 3D 00000004 R		cmp button, '^'
+	   5E
+ 00000485  0F 84 000002F8		JE power
+
+ 0000048B  80 3D 00000004 R		cmp button, 'r'
+	   72
+ 00000492  0F 84 FFFFFF68		JE start
+ 00000498  0F 85 000003FF		JNE stop
+
+				;----------------------Addision---------------------
+ 0000049E			addition :
+
+ 0000049E  BA 00000002 R		mov edx, offset num2; read 2nd no
+ 000004A3  E8 00000000 E		call readint
+ 000004A8  66| A3			mov num2, ax
+	   00000002 R
+
+ 000004AE  66| A1			mov ax, num1
+	   00000000 R
+ 000004B4  66| 03 05			add ax, num2
+	   00000002 R
+
+ 000004BB  66| 0F BA E0			bt ax, 31
+	   1F
+ 000004C0  72 26			JC printNegAdd    ;If the number is negative jump to printNegAdd
+
+ 000004C2  B2 02			mov dl, xfirst
+ 000004C4  B6 02			mov dh, yfirst
+
+ 000004C6  E8 00000000 E		call Gotoxy
+
+ 000004CB  BA 0000001B R		mov edx, offset pomerase
+ 000004D0  E8 00000000 E		call writestring
+
+ 000004D5  B2 02			mov dl, xfirst
+ 000004D7  B6 02			mov dh, yfirst
+
+ 000004D9  E8 00000000 E		call Gotoxy
+
+ 000004DE  E8 00000000 E		call writeint
+
+ 000004E3  E9 FFFFFF07			JMP loopWait
+
+ 000004E8				printNegAdd:
+
+ 000004E8  66| F7 D8				neg ax
+						
+ 000004EB  B2 02				mov dl, xfirst
+ 000004ED  B6 02				mov dh, yfirst
+
+ 000004EF  E8 00000000 E			call Gotoxy
+
+ 000004F4  BA 0000001B R			mov edx, offset pomerase
+ 000004F9  E8 00000000 E			call writestring
+
+ 000004FE  B2 02				mov dl, xfirst
+ 00000500  B6 02				mov dh, yfirst
+
+ 00000502  E8 00000000 E			call Gotoxy
+
+ 00000507  BA 00000005 R			mov edx, offset pomneg
+ 0000050C  E8 00000000 E			call writestring
+ 00000511  E8 00000000 E			call writedec
+
+ 00000516  E9 FFFFFED4				JMP loopWait
+				;----------------------Substraction---------------------
+ 0000051B			subtraction :
+
+ 0000051B  BA 00000002 R		mov edx, offset num2; read 2nd no
+ 00000520  E8 00000000 E		call readint
+ 00000525  66| A3			mov num2, ax
+	   00000002 R
+
+ 0000052B  66| A1			mov ax, num1
+	   00000000 R
+
+ 00000531  66| 0F BA E0			bt ax, 31
+	   1F
+ 00000536  72 6C			JC printNegSubAdd			; If the first number is negative jump to printNegSubAdd
+
+ 00000538  66| 2B 05			sub ax, num2
+	   00000002 R
+
+ 0000053F  72 26			JC prntNegSub				;If the result is negative jump to printNegSub
+
+ 00000541  B2 02			mov dl, xfirst
+ 00000543  B6 02			mov dh, yfirst
+
+ 00000545  E8 00000000 E		call Gotoxy
+
+ 0000054A  BA 0000001B R		mov edx, offset pomerase
+ 0000054F  E8 00000000 E		call writestring
+
+ 00000554  B2 02			mov dl, xfirst
+ 00000556  B6 02			mov dh, yfirst
+
+ 00000558  E8 00000000 E		call Gotoxy
+
+ 0000055D  E8 00000000 E		call writeint
+
+ 00000562  E9 FFFFFE88			JMP loopWait
+
+ 00000567				prntNegSub:
+ 00000567  66| A1				mov ax, num2
+	   00000002 R
+ 0000056D  66| 2B 05				sub ax, num1
+	   00000000 R
+
+ 00000574  B2 02				mov dl, xfirst
+ 00000576  B6 02				mov dh, yfirst
+
+ 00000578  E8 00000000 E			call Gotoxy
+
+ 0000057D  BA 0000001B R			mov edx, offset pomerase
+ 00000582  E8 00000000 E			call writestring
+
+ 00000587  B2 02				mov dl, xfirst
+ 00000589  B6 02				mov dh, yfirst
+
+ 0000058B  E8 00000000 E			call Gotoxy
+
+ 00000590  BA 00000005 R			mov edx, offset pomneg
+ 00000595  E8 00000000 E			call writestring
+ 0000059A  E8 00000000 E			call writedec
+
+ 0000059F  E9 FFFFFE4B				JMP loopWait
+
+ 000005A4				printNegSubAdd:
+
+ 000005A4  66| F7 1D				neg num1
+	   00000000 R
+ 000005AB  66| A1				mov ax, num1
+	   00000000 R
+ 000005B1  66| 03 05				add ax, num2
+	   00000002 R
+
+ 000005B8  B2 02				mov dl, xfirst
+ 000005BA  B6 02				mov dh, yfirst
+
+ 000005BC  E8 00000000 E			call Gotoxy
+
+ 000005C1  BA 0000001B R			mov edx, offset pomerase
+ 000005C6  E8 00000000 E			call writestring
+
+ 000005CB  B2 02				mov dl, xfirst
+ 000005CD  B6 02				mov dh, yfirst
+
+ 000005CF  E8 00000000 E			call Gotoxy
+
+ 000005D4  BA 00000005 R			mov edx, offset pomneg
+ 000005D9  E8 00000000 E			call writestring
+ 000005DE  E8 00000000 E			call writedec
+
+ 000005E3  E9 FFFFFE07				JMP loopWait
+				;--------------------Multiplication--------------------
+
+ 000005E8			multiplication :
+
+ 000005E8  BA 00000002 R		mov edx, offset num2; read 2nd no
+ 000005ED  E8 00000000 E		call readint
+ 000005F2  66| A3			mov num2, ax
+	   00000002 R
+
+ 000005F8  66| A1			mov ax, num1
+	   00000000 R
+ 000005FE  66| 0F BA E0			bt ax, 31
+	   1F
+ 00000603  72 30			JC prntNegMul			;If the first number is negative jump to printNegMul
+ 00000605  66| 8B 1D			mov bx, num2
+	   00000002 R
+ 0000060C  66| F7 E3			mul bx
+
+ 0000060F  B2 02			mov dl, xfirst
+ 00000611  B6 02			mov dh, yfirst
+
+ 00000613  E8 00000000 E		call Gotoxy
+
+ 00000618  BA 0000001B R		mov edx, offset pomerase
+ 0000061D  E8 00000000 E		call writestring
+
+ 00000622  B2 02			mov dl, xfirst
+ 00000624  B6 02			mov dh, yfirst
+
+ 00000626  E8 00000000 E		call Gotoxy
+
+ 0000062B  E8 00000000 E		call writeint
+
+ 00000630  E9 FFFFFDBA			JMP loopWait
+
+ 00000635				prntNegMul :
+
+ 00000635  66| F7 1D				neg num1 
+	   00000000 R
+ 0000063C  66| A1				mov ax, num1
+	   00000000 R
+ 00000642  66| 8B 1D				mov bx, num2
+	   00000002 R
+ 00000649  66| F7 E3				mul bx
+
+ 0000064C  B2 02				mov dl, xfirst
+ 0000064E  B6 02				mov dh, yfirst
+
+ 00000650  E8 00000000 E			call Gotoxy
+
+ 00000655  BA 0000001B R			mov edx, offset pomerase
+ 0000065A  E8 00000000 E			call writestring
+
+ 0000065F  B2 02				mov dl, xfirst
+ 00000661  B6 02				mov dh, yfirst
+
+ 00000663  E8 00000000 E			call Gotoxy
+
+ 00000668  BA 00000005 R			mov edx, offset pomneg
+ 0000066D  E8 00000000 E			call writestring
+ 00000672  E8 00000000 E			call writedec
+
+ 00000677  E9 FFFFFD73				JMP loopWait
+
+				;-------------------Division--------------------------
+ 0000067C			division :
+
+ 0000067C  BA 00000002 R		mov edx, offset num2			;Read 2nd no
+ 00000681  E8 00000000 E		call readint
+ 00000686  0F 84 00000092		JZ printInfOrUnd				;If the second number is zero jump to printInfOrUnd
+ 0000068C  66| A3			mov num2, ax
+	   00000002 R
+
+ 00000692  66| A1			mov ax, num1
+	   00000000 R
+ 00000698  66| 0F BA E0			bt ax, 31
+	   1F
+ 0000069D  72 34			jc prntNegDiv					; If the first number is negative jump to printNegDiv
+ 0000069F  66| 8B 1D			mov bx, num2
+	   00000002 R
+ 000006A6  66| BA 0000			mov dx, 0
+ 000006AA  66| F7 F3			div bx
+
+ 000006AD  B2 02			mov dl, xfirst
+ 000006AF  B6 02			mov dh, yfirst
+
+ 000006B1  E8 00000000 E		call Gotoxy
+
+ 000006B6  BA 0000001B R		mov edx, offset pomerase
+ 000006BB  E8 00000000 E		call writestring
+
+ 000006C0  B2 02			mov dl, xfirst
+ 000006C2  B6 02			mov dh, yfirst
+
+ 000006C4  E8 00000000 E		call Gotoxy
+
+ 000006C9  E8 00000000 E		call writeint
+
+ 000006CE  E9 FFFFFD1C			JMP loopWait
+
+ 000006D3				prntNegDiv :
+
+ 000006D3  66| F7 1D				neg num1
+	   00000000 R
+ 000006DA  66| A1				mov ax, num1
+	   00000000 R
+ 000006E0  66| 8B 1D				mov bx, num2
+	   00000002 R
+ 000006E7  66| BA 0000				mov dx, 0
+ 000006EB  66| F7 F3				div bx
+
+ 000006EE  B2 02				mov dl, xfirst
+ 000006F0  B6 02				mov dh, yfirst
+
+ 000006F2  E8 00000000 E			call Gotoxy
+
+ 000006F7  BA 0000001B R			mov edx, offset pomerase
+ 000006FC  E8 00000000 E			call writestring
+
+ 00000701  B2 02				mov dl, xfirst
+ 00000703  B6 02				mov dh, yfirst
+
+ 00000705  E8 00000000 E			call Gotoxy
+
+ 0000070A  BA 00000005 R			mov edx, offset pomneg
+ 0000070F  E8 00000000 E			call writestring
+ 00000714  E8 00000000 E			call writedec
+
+ 00000719  E9 FFFFFCD1				JMP loopWait
+
+ 0000071E				printInfOrUnd:
+
+ 0000071E  66| A1				mov ax, num1
+	   00000000 R
+ 00000724  66| BB FFFF				mov bx, 0FFFFh
+ 00000728  66| 23 C3				and ax, bx
+ 0000072B  75 2B				JNZ printInf
+						
+ 0000072D  B2 02				mov dl, xfirst
+ 0000072F  B6 02				mov dh, yfirst
+							
+ 00000731  E8 00000000 E			call Gotoxy
+
+ 00000736  BA 0000001B R			mov edx, offset pomerase
+ 0000073B  E8 00000000 E			call writestring
+
+ 00000740  B2 02				mov dl, xfirst
+ 00000742  B6 02				mov dh, yfirst
+
+ 00000744  E8 00000000 E			call Gotoxy
+
+ 00000749  BA 0000000E R			mov edx, offset pomnul
+ 0000074E  E8 00000000 E			call writestring
+
+ 00000753  E9 FFFFFC97				JMP loopWait
+
+ 00000758				printInf:
+ 00000758  B2 02				mov dl, xfirst
+ 0000075A  B6 02				mov dh, yfirst
+
+ 0000075C  E8 00000000 E			call Gotoxy
+
+ 00000761  BA 0000001B R			mov edx, offset pomerase
+ 00000766  E8 00000000 E			call writestring
+
+ 0000076B  B2 02				mov dl, xfirst
+ 0000076D  B6 02				mov dh, yfirst
+
+ 0000076F  E8 00000000 E			call Gotoxy
+
+ 00000774  BA 00000007 R			mov edx, offset pomInf
+ 00000779  E8 00000000 E			call writestring
+
+ 0000077E  E9 FFFFFC6C				JMP loopWait
+
+				;-----------------------Power----------------------
+ 00000783			power :
+					
+ 00000783  BA 00000002 R		mov edx, offset num2			; Read 2nd no
+ 00000788  E8 00000000 E		call readint
+ 0000078D  66| A3			mov num2, ax
+	   00000002 R
+ 00000793  66| 8B 3D			mov di, num1
+	   00000000 R
+ 0000079A  66| 8B 35			mov si, num2
+	   00000002 R
+ 000007A1  66| A1			mov ax, num1
+	   00000000 R
+
+ 000007A7  0F 84 00000092		JZ printOne						; If the second number is zero jump to printOne
+
+ 000007AD  66| 8B 0D			mov cx, num2
+	   00000002 R
+					
+ 000007B4  66| 8B D8			mov bx, ax
+ 000007B7  66| 0F BA E0			bt ax, 31
+	   1F
+
+ 000007BC  73 10			JNC LMul
+
+ 000007BE  66| F7 1D			neg num1
+	   00000000 R
+ 000007C5  66| A1			mov ax, num1
+	   00000000 R
+ 000007CB  66| 8B D8			mov bx, ax
+
+ 000007CE				LMul :
+ 000007CE  66| 49				dec cx
+ 000007D0  66| 83 F9 00				cmp cx, 0
+ 000007D4  74 05				JZ printPow
+ 000007D6  66| F7 E3				mul bx
+ 000007D9  EB F3				JMP LMul
+
+ 000007DB				printPow:
+ 000007DB  66| 0F BA E7				bt di, 31
+	   1F
+ 000007E0  72 26				jc PrintNeg					; If the first number is negative jump to printNeg
+
+ 000007E2				printPos:
+
+ 000007E2  B2 02				mov dl, xfirst
+ 000007E4  B6 02				mov dh, yfirst
+
+ 000007E6  E8 00000000 E			call Gotoxy
+
+ 000007EB  BA 0000001B R			mov edx, offset pomerase
+ 000007F0  E8 00000000 E			call writestring
+
+ 000007F5  B2 02				mov dl, xfirst
+ 000007F7  B6 02				mov dh, yfirst
+
+ 000007F9  E8 00000000 E			call Gotoxy
+
+ 000007FE  E8 00000000 E			call writeint
+
+ 00000803  E9 FFFFFBE7				JMP loopWait
+
+ 00000808				PrintNeg:
+
+ 00000808  66| 0F BA E6				bt si, 0
+	   00
+ 0000080D  73 D3				JNC printPos			;If the second number is even jump to printPos
+
+ 0000080F  B2 02				mov dl, xfirst
+ 00000811  B6 02				mov dh, yfirst
+
+ 00000813  E8 00000000 E			call Gotoxy
+
+ 00000818  BA 0000001B R			mov edx, offset pomerase
+ 0000081D  E8 00000000 E			call writestring
+
+ 00000822  B2 02				mov dl, xfirst
+ 00000824  B6 02				mov dh, yfirst
+
+ 00000826  E8 00000000 E			call Gotoxy
+
+ 0000082B  BA 00000005 R			mov edx, offset pomneg
+ 00000830  E8 00000000 E			call writestring
+ 00000835  E8 00000000 E			call writedec
+
+ 0000083A  E9 FFFFFBB0				JMP loopWait
+
+ 0000083F				printOne :
+
+ 0000083F  66| BB FFFF				mov bx, 0FFFFh
+ 00000843  66| 23 C3				and ax, bx
+ 00000846  74 2A				JZ printError				;If the bouth numbers are zero jump to printError
+ 00000848  66| B8 0001				mov ax, 1
+
+ 0000084C  B2 02				mov dl, xfirst
+ 0000084E  B6 02				mov dh, yfirst
+
+ 00000850  E8 00000000 E			call Gotoxy
+
+ 00000855  BA 0000001B R			mov edx, offset pomerase
+ 0000085A  E8 00000000 E			call writestring
+
+ 0000085F  B2 02				mov dl, xfirst
+ 00000861  B6 02				mov dh, yfirst
+
+ 00000863  E8 00000000 E			call Gotoxy
+
+ 00000868  E8 00000000 E			call writeint
+
+ 0000086D  E9 FFFFFB7D				JMP loopWait
+
+ 00000872				printError:
+
+ 00000872  B2 02				mov dl, xfirst
+ 00000874  B6 02				mov dh, yfirst
+
+ 00000876  E8 00000000 E			call Gotoxy
+
+ 0000087B  BA 0000001B R			mov edx, offset pomerase
+ 00000880  E8 00000000 E			call writestring
+
+ 00000885  B2 02				mov dl, xfirst
+ 00000887  B6 02				mov dh, yfirst
+
+ 00000889  E8 00000000 E			call Gotoxy
+
+ 0000088E  BA 0000000E R			mov edx, offset pomnul
+ 00000893  E8 00000000 E			call writestring
+
+ 00000898  E9 FFFFFB52				JMP loopWait
+
+				;---------------------Program ENDS here----------------------
+ 0000089D			stop :
+					exit
+ 0000089D  6A 00	   *	    push   +000000000h
+ 0000089F  E8 00000000 E   *	    call   ExitProcess
+ 000008A4			main endp
+				end main
+
+
+
+
+
+
+
+
+Microsoft (R) Macro Assembler Version 14.00.23026.0	    09/12/18 17:56:36
+AddTwo.asm						     Symbols 2 - 1
+
+
+
+
+Structures and Unions:
+
+                N a m e                  Size
+                                         Offset      Type
+
+CONSOLE_CURSOR_INFO  . . . . . .	 00000008
+  dwSize . . . . . . . . . . . .	 00000000	 DWord
+  bVisible . . . . . . . . . . .	 00000004	 DWord
+CONSOLE_SCREEN_BUFFER_INFO . . .	 00000016
+  dwSize . . . . . . . . . . . .	 00000000	 DWord
+  dwCursorPosition . . . . . . .	 00000004	 DWord
+  wAttributes  . . . . . . . . .	 00000008	 Word
+  srWindow . . . . . . . . . . .	 0000000A	 QWord
+  dwMaximumWindowSize  . . . . .	 00000012	 DWord
+COORD  . . . . . . . . . . . . .	 00000004
+  X  . . . . . . . . . . . . . .	 00000000	 Word
+  Y  . . . . . . . . . . . . . .	 00000002	 Word
+FILETIME . . . . . . . . . . . .	 00000008
+  loDateTime . . . . . . . . . .	 00000000	 DWord
+  hiDateTime . . . . . . . . . .	 00000004	 DWord
+FOCUS_EVENT_RECORD . . . . . . .	 00000004
+  bSetFocus  . . . . . . . . . .	 00000000	 DWord
+FPU_ENVIRON  . . . . . . . . . .	 0000001C
+  controlWord  . . . . . . . . .	 00000000	 Word
+  statusWord . . . . . . . . . .	 00000004	 Word
+  tagWord  . . . . . . . . . . .	 00000008	 Word
+  instrPointerOffset . . . . . .	 0000000C	 DWord
+  instrPointerSelector . . . . .	 00000010	 DWord
+  operandPointerOffset . . . . .	 00000014	 DWord
+  operandPointerSelector . . . .	 00000018	 Word
+INPUT_RECORD . . . . . . . . . .	 00000014
+  EventType  . . . . . . . . . .	 00000000	 Word
+  Event  . . . . . . . . . . . .	 00000004	 XmmWord
+  bKeyDown . . . . . . . . . . .	 00000000	 DWord
+  wRepeatCount . . . . . . . . .	 00000004	 Word
+  wVirtualKeyCode  . . . . . . .	 00000006	 Word
+  wVirtualScanCode . . . . . . .	 00000008	 Word
+  uChar  . . . . . . . . . . . .	 0000000A	 Word
+  UnicodeChar  . . . . . . . . .	 00000000	 Word
+  AsciiChar  . . . . . . . . . .	 00000000	 Byte
+  dwControlKeyState  . . . . . .	 0000000C	 DWord
+  dwMousePosition  . . . . . . .	 00000000	 DWord
+  dwButtonState  . . . . . . . .	 00000004	 DWord
+  dwMouseControlKeyState . . . .	 00000008	 DWord
+  dwEventFlags . . . . . . . . .	 0000000C	 DWord
+  dwSize . . . . . . . . . . . .	 00000000	 DWord
+  dwCommandId  . . . . . . . . .	 00000000	 DWord
+  bSetFocus  . . . . . . . . . .	 00000000	 DWord
+KEY_EVENT_RECORD . . . . . . . .	 00000010
+  bKeyDown . . . . . . . . . . .	 00000000	 DWord
+  wRepeatCount . . . . . . . . .	 00000004	 Word
+  wVirtualKeyCode  . . . . . . .	 00000006	 Word
+  wVirtualScanCode . . . . . . .	 00000008	 Word
+  uChar  . . . . . . . . . . . .	 0000000A	 Word
+  UnicodeChar  . . . . . . . . .	 00000000	 Word
+  AsciiChar  . . . . . . . . . .	 00000000	 Byte
+  dwControlKeyState  . . . . . .	 0000000C	 DWord
+MENU_EVENT_RECORD  . . . . . . .	 00000004
+  dwCommandId  . . . . . . . . .	 00000000	 DWord
+MOUSE_EVENT_RECORD . . . . . . .	 00000010
+  dwMousePosition  . . . . . . .	 00000000	 DWord
+  dwButtonState  . . . . . . . .	 00000004	 DWord
+  dwMouseControlKeyState . . . .	 00000008	 DWord
+  dwEventFlags . . . . . . . . .	 0000000C	 DWord
+SMALL_RECT . . . . . . . . . . .	 00000008
+  Left . . . . . . . . . . . . .	 00000000	 Word
+  Top  . . . . . . . . . . . . .	 00000002	 Word
+  Right  . . . . . . . . . . . .	 00000004	 Word
+  Bottom . . . . . . . . . . . .	 00000006	 Word
+SYSTEMTIME . . . . . . . . . . .	 00000010
+  wYear  . . . . . . . . . . . .	 00000000	 Word
+  wMonth . . . . . . . . . . . .	 00000002	 Word
+  wDayOfWeek . . . . . . . . . .	 00000004	 Word
+  wDay . . . . . . . . . . . . .	 00000006	 Word
+  wHour  . . . . . . . . . . . .	 00000008	 Word
+  wMinute  . . . . . . . . . . .	 0000000A	 Word
+  wSecond  . . . . . . . . . . .	 0000000C	 Word
+  wMilliseconds  . . . . . . . .	 0000000E	 Word
+WINDOW_BUFFER_SIZE_RECORD  . . .	 00000004
+  dwSize . . . . . . . . . . . .	 00000000	 DWord
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000035 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000008A4 Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+CloseFile  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+CloseHandle  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Clrscr . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+CreateFileA  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+CreateOutputFile . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Crlf . . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Delay  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DumpMem  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+DumpRegs . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+FileTimeToDosDateTime  . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+FileTimeToSystemTime . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+FlushConsoleInputBuffer  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+FormatMessageA . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetCommandLineA  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetCommandTail . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetConsoleCP . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetConsoleScreenBufferInfo . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetDateTime  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetFileTime  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetKeyState  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetLastError . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetLocalTime . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetMaxXY . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetMseconds  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetNumberOfConsoleInputEvents  .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetProcessHeap . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetStdHandle . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetSystemTime  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetTextColor . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+GetTickCount . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Gotoxy . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapAlloc  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapCreate . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapDestroy  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapFree . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+HeapSize . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+IsDigit  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+LocalFree  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+MessageBoxA  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+MsgBoxAsk  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+MsgBox . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OpenInputFile  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ParseDecimal32 . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ParseInteger32 . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+PeekConsoleInputA  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Random32 . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+RandomRange  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Randomize  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadChar . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadConsoleA . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadConsoleInputA  . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadDec  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadFile . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadFloat  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadFromFile . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadHex  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleScreenBufferSize . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleTextAttribute  . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleTitleA . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetConsoleWindowInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetFilePointer . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetLocalTime . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SetTextColor . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ShowFPUStack . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Sleep  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+StrLength  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Str_compare  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Str_copy . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Str_length . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Str_trim . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+Str_ucase  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+SystemTimeToFileTime . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WaitMsg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteBinB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteBin . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteChar  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteConsoleA  . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteConsoleOutputAttribute  . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteConsoleOutputCharacterA . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteDec . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteFile  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteFloat . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteHexB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteHex . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteInt . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000008A4 Public STDCALL
+  DrawLineV1 . . . . . . . . . .	L Near	 00000050 _TEXT	
+  DrawLineV2 . . . . . . . . . .	L Near	 00000069 _TEXT	
+  DrawLineV3 . . . . . . . . . .	L Near	 00000082 _TEXT	
+  DrawLineV4 . . . . . . . . . .	L Near	 0000009B _TEXT	
+  DrawLineV5 . . . . . . . . . .	L Near	 000000B4 _TEXT	
+  DrawLineH1 . . . . . . . . . .	L Near	 000000CD _TEXT	
+  DrawLineH2 . . . . . . . . . .	L Near	 000000E6 _TEXT	
+  DrawLineH3 . . . . . . . . . .	L Near	 000000FF _TEXT	
+  DrawLineH4 . . . . . . . . . .	L Near	 00000118 _TEXT	
+  DrawLineH5 . . . . . . . . . .	L Near	 00000131 _TEXT	
+  DrawLineH6 . . . . . . . . . .	L Near	 0000014A _TEXT	
+  loopWait . . . . . . . . . . .	L Near	 000003EF _TEXT	
+  start  . . . . . . . . . . . .	L Near	 00000400 _TEXT	
+  addition . . . . . . . . . . .	L Near	 0000049E _TEXT	
+  printNegAdd  . . . . . . . . .	L Near	 000004E8 _TEXT	
+  subtraction  . . . . . . . . .	L Near	 0000051B _TEXT	
+  prntNegSub . . . . . . . . . .	L Near	 00000567 _TEXT	
+  printNegSubAdd . . . . . . . .	L Near	 000005A4 _TEXT	
+  multiplication . . . . . . . .	L Near	 000005E8 _TEXT	
+  prntNegMul . . . . . . . . . .	L Near	 00000635 _TEXT	
+  division . . . . . . . . . . .	L Near	 0000067C _TEXT	
+  prntNegDiv . . . . . . . . . .	L Near	 000006D3 _TEXT	
+  printInfOrUnd  . . . . . . . .	L Near	 0000071E _TEXT	
+  printInf . . . . . . . . . . .	L Near	 00000758 _TEXT	
+  power  . . . . . . . . . . . .	L Near	 00000783 _TEXT	
+  LMul . . . . . . . . . . . . .	L Near	 000007CE _TEXT	
+  printPow . . . . . . . . . . .	L Near	 000007DB _TEXT	
+  printPos . . . . . . . . . . .	L Near	 000007E2 _TEXT	
+  PrintNeg . . . . . . . . . . .	L Near	 00000808 _TEXT	
+  printOne . . . . . . . . . . .	L Near	 0000083F _TEXT	
+  printError . . . . . . . . . .	L Near	 00000872 _TEXT	
+  stop . . . . . . . . . . . . .	L Near	 0000089D _TEXT	
+printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000003h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+ALT_MASK . . . . . . . . . . . .	Number	 00000003h   
+CAPSLOCK_ON  . . . . . . . . . .	Number	 00000080h   
+CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h   
+CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
+CTRL_MASK  . . . . . . . . . . .	Number	 0000000Ch   
+CreateFile . . . . . . . . . . .	Text   	 CreateFileA
+DO_NOT_SHARE . . . . . . . . . .	Number	 00000000h   
+ENABLE_ECHO_INPUT  . . . . . . .	Number	 00000004h   
+ENABLE_LINE_INPUT  . . . . . . .	Number	 00000002h   
+ENABLE_MOUSE_INPUT . . . . . . .	Number	 00000010h   
+ENABLE_PROCESSED_INPUT . . . . .	Number	 00000001h   
+ENABLE_PROCESSED_OUTPUT  . . . .	Number	 00000001h   
+ENABLE_WINDOW_INPUT  . . . . . .	Number	 00000008h   
+ENABLE_WRAP_AT_EOL_OUTPUT  . . .	Number	 00000002h   
+ENHANCED_KEY . . . . . . . . . .	Number	 00000100h   
+FALSE  . . . . . . . . . . . . .	Number	 00000000h   
+FILE_APPEND_DATA . . . . . . . .	Number	 00000004h   
+FILE_ATTRIBUTE_ARCHIVE . . . . .	Number	 00000020h   
+FILE_ATTRIBUTE_COMPRESSED  . . .	Number	 00000800h   
+FILE_ATTRIBUTE_DEVICE  . . . . .	Number	 00000040h   
+FILE_ATTRIBUTE_DIRECTORY . . . .	Number	 00000010h   
+FILE_ATTRIBUTE_ENCRYPTED . . . .	Number	 00004000h   
+FILE_ATTRIBUTE_HIDDEN  . . . . .	Number	 00000002h   
+FILE_ATTRIBUTE_NORMAL  . . . . .	Number	 00000080h   
+FILE_ATTRIBUTE_NOT_CONTENT_INDEXED .	Number	 00002000h   
+FILE_ATTRIBUTE_OFFLINE . . . . .	Number	 00001000h   
+FILE_ATTRIBUTE_READONLY  . . . .	Number	 00000001h   
+FILE_ATTRIBUTE_REPARSE_POINT . .	Number	 00000400h   
+FILE_ATTRIBUTE_SPARSE_FILE . . .	Number	 00000200h   
+FILE_ATTRIBUTE_SYSTEM  . . . . .	Number	 00000004h   
+FILE_ATTRIBUTE_TEMPORARY . . . .	Number	 00000100h   
+FILE_BEGIN . . . . . . . . . . .	Number	 00000000h   
+FILE_CURRENT . . . . . . . . . .	Number	 00000001h   
+FILE_DELETE_CHILD  . . . . . . .	Number	 00000040h   
+FILE_END . . . . . . . . . . . .	Number	 00000002h   
+FILE_READ_DATA . . . . . . . . .	Number	 00000001h   
+FILE_SHARE_DELETE  . . . . . . .	Number	 00000004h   
+FILE_SHARE_READ  . . . . . . . .	Number	 00000001h   
+FILE_SHARE_WRITE . . . . . . . .	Number	 00000002h   
+FILE_WRITE_DATA  . . . . . . . .	Number	 00000002h   
+FOCUS_EVENT  . . . . . . . . . .	Number	 00000010h   
+FORMAT_MESSAGE_ALLOCATE_BUFFER .	Number	 00000100h   
+FORMAT_MESSAGE_FROM_SYSTEM . . .	Number	 00001000h   
+FormatMessage  . . . . . . . . .	Text   	 FormatMessageA
+GENERIC_ALL  . . . . . . . . . .	Number	 10000000h   
+GENERIC_EXECUTE  . . . . . . . .	Number	 20000000h   
+GENERIC_READ . . . . . . . . . .	Number	 -80000000h   
+GENERIC_WRITE  . . . . . . . . .	Number	 40000000h   
+GetCommandLine . . . . . . . . .	Text   	 GetCommandLineA
+HANDLE . . . . . . . . . . . . .	Text   	 DWORD
+HEAP_GENERATE_EXCEPTIONS . . . .	Number	 00000004h   
+HEAP_GROWABLE  . . . . . . . . .	Number	 00000002h   
+HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
+HEAP_REALLOC_IN_PLACE_ONLY . . .	Number	 00000010h   
+HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
+IDABORT  . . . . . . . . . . . .	Number	 00000003h   
+IDCANCEL . . . . . . . . . . . .	Number	 00000002h   
+IDCLOSE  . . . . . . . . . . . .	Number	 00000008h   
+IDCONTINUE . . . . . . . . . . .	Number	 0000000Bh   
+IDHELP . . . . . . . . . . . . .	Number	 00000009h   
+IDIGNORE . . . . . . . . . . . .	Number	 00000005h   
+IDNO . . . . . . . . . . . . . .	Number	 00000007h   
+IDOK . . . . . . . . . . . . . .	Number	 00000001h   
+IDRETRY  . . . . . . . . . . . .	Number	 00000004h   
+IDTIMEOUT  . . . . . . . . . . .	Number	 00007D00h   
+IDTRYAGAIN . . . . . . . . . . .	Number	 0000000Ah   
+IDYES  . . . . . . . . . . . . .	Number	 00000006h   
+INVALID_HANDLE_VALUE . . . . . .	Number	 -00000001h   
+KBDOWN_FLAG  . . . . . . . . . .	Number	 00000001h   
+KEY_EVENT  . . . . . . . . . . .	Number	 00000001h   
+KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
+LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
+LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
+MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
+MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
+MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
+MB_DEFBUTTON1  . . . . . . . . .	Number	 00000000h   
+MB_DEFBUTTON2  . . . . . . . . .	Number	 00000100h   
+MB_DEFBUTTON3  . . . . . . . . .	Number	 00000200h   
+MB_DEFBUTTON4  . . . . . . . . .	Number	 00000300h   
+MB_HELP  . . . . . . . . . . . .	Number	 00004000h   
+MB_ICONASTERISK  . . . . . . . .	Number	 00000040h   
+MB_ICONERROR . . . . . . . . . .	Number	 00000010h   
+MB_ICONEXCLAMATION . . . . . . .	Number	 00000030h   
+MB_ICONHAND  . . . . . . . . . .	Number	 00000010h   
+MB_ICONINFORMATION . . . . . . .	Number	 00000040h   
+MB_ICONQUESTION  . . . . . . . .	Number	 00000020h   
+MB_ICONSTOP  . . . . . . . . . .	Number	 00000010h   
+MB_ICONWARNING . . . . . . . . .	Number	 00000030h   
+MB_OKCANCEL  . . . . . . . . . .	Number	 00000001h   
+MB_OK  . . . . . . . . . . . . .	Number	 00000000h   
+MB_RETRYCANCEL . . . . . . . . .	Number	 00000005h   
+MB_SYSTEMMODAL . . . . . . . . .	Number	 00001000h   
+MB_TASKMODAL . . . . . . . . . .	Number	 00002000h   
+MB_USERICON  . . . . . . . . . .	Number	 00000080h   
+MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h   
+MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
+MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
+MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
+MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
+NULL . . . . . . . . . . . . . .	Number	 00000000h   
+NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
+OPEN_ALWAYS  . . . . . . . . . .	Number	 00000004h   
+OPEN_EXISTING  . . . . . . . . .	Number	 00000003h   
+PeekConsoleInput . . . . . . . .	Text   	 PeekConsoleInputA
+RIGHT_ALT_PRESSED  . . . . . . .	Number	 00000001h   
+RIGHT_CTRL_PRESSED . . . . . . .	Number	 00000004h   
+ReadConsoleInput . . . . . . . .	Text   	 ReadConsoleInputA
+ReadConsole  . . . . . . . . . .	Text   	 ReadConsoleA
+SCROLLLOCK_ON  . . . . . . . . .	Number	 00000040h   
+SHIFT_MASK . . . . . . . . . . .	Number	 00000010h   
+SHIFT_PRESSED  . . . . . . . . .	Number	 00000010h   
+STD_ERROR_HANDLE . . . . . . . .	Number	 -0000000Ch   
+STD_INPUT_HANDLE . . . . . . . .	Number	 -0000000Ah   
+STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
+SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
+TAB  . . . . . . . . . . . . . .	Number	 00000009h   
+TRUE . . . . . . . . . . . . . .	Number	 00000001h   
+TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
+VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
+VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
+VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
+VK_BACK  . . . . . . . . . . . .	Number	 00000008h   
+VK_CANCEL  . . . . . . . . . . .	Number	 00000003h   
+VK_CAPITAL . . . . . . . . . . .	Number	 00000014h   
+VK_CLEAR . . . . . . . . . . . .	Number	 0000000Ch   
+VK_CONTROL . . . . . . . . . . .	Number	 00000011h   
+VK_DECIMAL . . . . . . . . . . .	Number	 0000006Eh   
+VK_DELETE  . . . . . . . . . . .	Number	 0000002Eh   
+VK_DIVIDE  . . . . . . . . . . .	Number	 0000006Fh   
+VK_DOWN  . . . . . . . . . . . .	Number	 00000028h   
+VK_END . . . . . . . . . . . . .	Number	 00000023h   
+VK_ESCAPE  . . . . . . . . . . .	Number	 0000001Bh   
+VK_EXECUTE . . . . . . . . . . .	Number	 0000002Bh   
+VK_F10 . . . . . . . . . . . . .	Number	 00000079h   
+VK_F11 . . . . . . . . . . . . .	Number	 0000007Ah   
+VK_F12 . . . . . . . . . . . . .	Number	 0000007Bh   
+VK_F13 . . . . . . . . . . . . .	Number	 0000007Ch   
+VK_F14 . . . . . . . . . . . . .	Number	 0000007Dh   
+VK_F15 . . . . . . . . . . . . .	Number	 0000007Eh   
+VK_F16 . . . . . . . . . . . . .	Number	 0000007Fh   
+VK_F17 . . . . . . . . . . . . .	Number	 00000080h   
+VK_F18 . . . . . . . . . . . . .	Number	 00000081h   
+VK_F19 . . . . . . . . . . . . .	Number	 00000082h   
+VK_F1  . . . . . . . . . . . . .	Number	 00000070h   
+VK_F20 . . . . . . . . . . . . .	Number	 00000083h   
+VK_F21 . . . . . . . . . . . . .	Number	 00000084h   
+VK_F22 . . . . . . . . . . . . .	Number	 00000085h   
+VK_F23 . . . . . . . . . . . . .	Number	 00000086h   
+VK_F24 . . . . . . . . . . . . .	Number	 00000087h   
+VK_F2  . . . . . . . . . . . . .	Number	 00000071h   
+VK_F3  . . . . . . . . . . . . .	Number	 00000072h   
+VK_F4  . . . . . . . . . . . . .	Number	 00000073h   
+VK_F5  . . . . . . . . . . . . .	Number	 00000074h   
+VK_F6  . . . . . . . . . . . . .	Number	 00000075h   
+VK_F7  . . . . . . . . . . . . .	Number	 00000076h   
+VK_F8  . . . . . . . . . . . . .	Number	 00000077h   
+VK_F9  . . . . . . . . . . . . .	Number	 00000078h   
+VK_HELP  . . . . . . . . . . . .	Number	 0000002Fh   
+VK_HOME  . . . . . . . . . . . .	Number	 00000024h   
+VK_INSERT  . . . . . . . . . . .	Number	 0000002Dh   
+VK_LBUTTON . . . . . . . . . . .	Number	 00000001h   
+VK_LCONTROL  . . . . . . . . . .	Number	 000000A2h   
+VK_LEFT  . . . . . . . . . . . .	Number	 00000025h   
+VK_LMENU . . . . . . . . . . . .	Number	 000000A4h   
+VK_LSHIFT  . . . . . . . . . . .	Number	 000000A0h   
+VK_MENU  . . . . . . . . . . . .	Number	 00000012h   
+VK_MULTIPLY  . . . . . . . . . .	Number	 0000006Ah   
+VK_NEXT  . . . . . . . . . . . .	Number	 00000022h   
+VK_NUMLOCK . . . . . . . . . . .	Number	 00000090h   
+VK_NUMPAD0 . . . . . . . . . . .	Number	 00000060h   
+VK_NUMPAD1 . . . . . . . . . . .	Number	 00000061h   
+VK_NUMPAD2 . . . . . . . . . . .	Number	 00000062h   
+VK_NUMPAD3 . . . . . . . . . . .	Number	 00000063h   
+VK_NUMPAD4 . . . . . . . . . . .	Number	 00000064h   
+VK_NUMPAD5 . . . . . . . . . . .	Number	 00000065h   
+VK_NUMPAD6 . . . . . . . . . . .	Number	 00000066h   
+VK_NUMPAD7 . . . . . . . . . . .	Number	 00000067h   
+VK_NUMPAD8 . . . . . . . . . . .	Number	 00000068h   
+VK_NUMPAD9 . . . . . . . . . . .	Number	 00000069h   
+VK_PAUSE . . . . . . . . . . . .	Number	 00000013h   
+VK_PRINT . . . . . . . . . . . .	Number	 0000002Ah   
+VK_PRIOR . . . . . . . . . . . .	Number	 00000021h   
+VK_RBUTTON . . . . . . . . . . .	Number	 00000002h   
+VK_RCONTROL  . . . . . . . . . .	Number	 000000A3h   
+VK_RETURN  . . . . . . . . . . .	Number	 0000000Dh   
+VK_RIGHT . . . . . . . . . . . .	Number	 00000027h   
+VK_RMENU . . . . . . . . . . . .	Number	 000000A5h   
+VK_RSHIFT  . . . . . . . . . . .	Number	 000000A1h   
+VK_SCROLL  . . . . . . . . . . .	Number	 00000091h   
+VK_SEPARATER . . . . . . . . . .	Number	 0000006Ch   
+VK_SHIFT . . . . . . . . . . . .	Number	 00000010h   
+VK_SNAPSHOT  . . . . . . . . . .	Number	 0000002Ch   
+VK_SPACE . . . . . . . . . . . .	Number	 00000020h   
+VK_SUBTRACT  . . . . . . . . . .	Number	 0000006Dh   
+VK_TAB . . . . . . . . . . . . .	Number	 00000009h   
+VK_UP  . . . . . . . . . . . . .	Number	 00000026h   
+WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
+WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
+WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
+black  . . . . . . . . . . . . .	Number	 00000000h   
+blue . . . . . . . . . . . . . .	Number	 00000001h   
+brown  . . . . . . . . . . . . .	Number	 00000006h   
+button . . . . . . . . . . . . .	Byte	 00000004 _DATA	
+cursorInfo . . . . . . . . . . .	CONSOLE_CURSOR_INFO  00000029 _DATA	
+cyan . . . . . . . . . . . . . .	Number	 00000003h   
+exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+gray . . . . . . . . . . . . . .	Number	 00000008h   
+green  . . . . . . . . . . . . .	Number	 00000002h   
+lightBlue  . . . . . . . . . . .	Number	 00000009h   
+lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
+lightGray  . . . . . . . . . . .	Number	 00000007h   
+lightGreen . . . . . . . . . . .	Number	 0000000Ah   
+lightMagenta . . . . . . . . . .	Number	 0000000Dh   
+lightRed . . . . . . . . . . . .	Number	 0000000Ch   
+lineBottom . . . . . . . . . . .	Number	 00000014h   
+lineHorizontal1  . . . . . . . .	Number	 00000004h   
+lineHorizontal2  . . . . . . . .	Number	 00000008h   
+lineHorizontal3  . . . . . . . .	Number	 0000000Ch   
+lineHorizontal4  . . . . . . . .	Number	 00000010h   
+lineLeft . . . . . . . . . . . .	Number	 00000000h   
+lineRight  . . . . . . . . . . .	Number	 00000010h   
+lineTop  . . . . . . . . . . . .	Number	 00000000h   
+lineVertical1  . . . . . . . . .	Number	 00000004h   
+lineVertical2  . . . . . . . . .	Number	 00000008h   
+lineVertical3  . . . . . . . . .	Number	 0000000Ch   
+magenta  . . . . . . . . . . . .	Number	 00000005h   
+num1 . . . . . . . . . . . . . .	Word	 00000000 _DATA	
+num2 . . . . . . . . . . . . . .	Word	 00000002 _DATA	
+outHandle  . . . . . . . . . . .	DWord	 00000031 _DATA	
+pomerase . . . . . . . . . . . .	Byte	 0000001B _DATA	
+pominf . . . . . . . . . . . . .	Byte	 00000007 _DATA	
+pomneg . . . . . . . . . . . . .	Byte	 00000005 _DATA	
+pomnul . . . . . . . . . . . . .	Byte	 0000000E _DATA	
+red  . . . . . . . . . . . . . .	Number	 00000004h   
+white  . . . . . . . . . . . . .	Number	 0000000Fh   
+wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
+x0 . . . . . . . . . . . . . . .	Number	 00000002h   
+x11  . . . . . . . . . . . . . .	Number	 00000000h   
+x15  . . . . . . . . . . . . . .	Number	 00000010h   
+x1 . . . . . . . . . . . . . . .	Number	 00000002h   
+x21  . . . . . . . . . . . . . .	Number	 00000000h   
+x22  . . . . . . . . . . . . . .	Number	 00000004h   
+x23  . . . . . . . . . . . . . .	Number	 00000008h   
+x24  . . . . . . . . . . . . . .	Number	 0000000Ch   
+x25  . . . . . . . . . . . . . .	Number	 00000010h   
+x2 . . . . . . . . . . . . . . .	Number	 00000006h   
+x31  . . . . . . . . . . . . . .	Number	 00000000h   
+x32  . . . . . . . . . . . . . .	Number	 00000004h   
+x33  . . . . . . . . . . . . . .	Number	 00000008h   
+x34  . . . . . . . . . . . . . .	Number	 0000000Ch   
+x35  . . . . . . . . . . . . . .	Number	 00000010h   
+x3 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+x41  . . . . . . . . . . . . . .	Number	 00000000h   
+x42  . . . . . . . . . . . . . .	Number	 00000004h   
+x43  . . . . . . . . . . . . . .	Number	 00000008h   
+x44  . . . . . . . . . . . . . .	Number	 0000000Ch   
+x45  . . . . . . . . . . . . . .	Number	 00000010h   
+x4 . . . . . . . . . . . . . . .	Number	 00000002h   
+x51  . . . . . . . . . . . . . .	Number	 00000000h   
+x52  . . . . . . . . . . . . . .	Number	 00000004h   
+x53  . . . . . . . . . . . . . .	Number	 00000008h   
+x54  . . . . . . . . . . . . . .	Number	 0000000Ch   
+x55  . . . . . . . . . . . . . .	Number	 00000010h   
+x5 . . . . . . . . . . . . . . .	Number	 00000006h   
+x61  . . . . . . . . . . . . . .	Number	 00000000h   
+x62  . . . . . . . . . . . . . .	Number	 00000004h   
+x63  . . . . . . . . . . . . . .	Number	 00000008h   
+x64  . . . . . . . . . . . . . .	Number	 0000000Ch   
+x65  . . . . . . . . . . . . . .	Number	 00000010h   
+x6 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+x7 . . . . . . . . . . . . . . .	Number	 00000002h   
+x8 . . . . . . . . . . . . . . .	Number	 00000006h   
+x9 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+xad  . . . . . . . . . . . . . .	Number	 0000000Eh   
+xdiv . . . . . . . . . . . . . .	Number	 0000000Eh   
+xeq  . . . . . . . . . . . . . .	Number	 00000006h   
+xfirst . . . . . . . . . . . . .	Number	 00000002h   
+xmax . . . . . . . . . . . . . .	Number	 00000011h   
+xmin . . . . . . . . . . . . . .	Number	 00000000h   
+xmul . . . . . . . . . . . . . .	Number	 0000000Eh   
+xpow . . . . . . . . . . . . . .	Number	 0000000Ah   
+xsub . . . . . . . . . . . . . .	Number	 0000000Eh   
+y0 . . . . . . . . . . . . . . .	Number	 00000012h   
+y11  . . . . . . . . . . . . . .	Number	 00000000h   
+y15  . . . . . . . . . . . . . .	Number	 00000000h   
+y1 . . . . . . . . . . . . . . .	Number	 0000000Eh   
+y21  . . . . . . . . . . . . . .	Number	 00000004h   
+y22  . . . . . . . . . . . . . .	Number	 00000004h   
+y23  . . . . . . . . . . . . . .	Number	 00000004h   
+y24  . . . . . . . . . . . . . .	Number	 00000004h   
+y25  . . . . . . . . . . . . . .	Number	 00000004h   
+y2 . . . . . . . . . . . . . . .	Number	 0000000Eh   
+y31  . . . . . . . . . . . . . .	Number	 00000008h   
+y32  . . . . . . . . . . . . . .	Number	 00000008h   
+y33  . . . . . . . . . . . . . .	Number	 00000008h   
+y34  . . . . . . . . . . . . . .	Number	 00000008h   
+y35  . . . . . . . . . . . . . .	Number	 00000008h   
+y3 . . . . . . . . . . . . . . .	Number	 0000000Eh   
+y41  . . . . . . . . . . . . . .	Number	 0000000Ch   
+y42  . . . . . . . . . . . . . .	Number	 0000000Ch   
+y43  . . . . . . . . . . . . . .	Number	 0000000Ch   
+y44  . . . . . . . . . . . . . .	Number	 0000000Ch   
+y45  . . . . . . . . . . . . . .	Number	 0000000Ch   
+y4 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+y51  . . . . . . . . . . . . . .	Number	 00000010h   
+y52  . . . . . . . . . . . . . .	Number	 00000010h   
+y53  . . . . . . . . . . . . . .	Number	 00000010h   
+y54  . . . . . . . . . . . . . .	Number	 00000010h   
+y55  . . . . . . . . . . . . . .	Number	 00000010h   
+y5 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+y61  . . . . . . . . . . . . . .	Number	 00000014h   
+y62  . . . . . . . . . . . . . .	Number	 00000014h   
+y63  . . . . . . . . . . . . . .	Number	 00000014h   
+y64  . . . . . . . . . . . . . .	Number	 00000014h   
+y65  . . . . . . . . . . . . . .	Number	 00000014h   
+y6 . . . . . . . . . . . . . . .	Number	 0000000Ah   
+y7 . . . . . . . . . . . . . . .	Number	 00000006h   
+y8 . . . . . . . . . . . . . . .	Number	 00000006h   
+y9 . . . . . . . . . . . . . . .	Number	 00000006h   
+yad  . . . . . . . . . . . . . .	Number	 00000012h   
+ydiv . . . . . . . . . . . . . .	Number	 00000006h   
+yellow . . . . . . . . . . . . .	Number	 0000000Eh   
+yeq  . . . . . . . . . . . . . .	Number	 00000012h   
+yfirst . . . . . . . . . . . . .	Number	 00000002h   
+ymax . . . . . . . . . . . . . .	Number	 00000015h   
+ymin . . . . . . . . . . . . . .	Number	 00000000h   
+ymul . . . . . . . . . . . . . .	Number	 0000000Ah   
+ypow . . . . . . . . . . . . . .	Number	 00000012h   
+ysub . . . . . . . . . . . . . .	Number	 0000000Eh   
+
+	   0 Warnings
+	   0 Errors
